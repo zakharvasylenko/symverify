@@ -54,3 +54,21 @@ def test_useless_expressions():
     assert ninth == z
     assert tenth == z
     assert eleventh == x
+
+def test_commutativity_and_contraction():
+    arena = DagArena()
+    x = arena.make_node(Var("x"))
+    y = arena.make_node(Var("y"))
+    first = arena.make_node(Add(x,y))
+    second = arena.make_node(Add(y,x))
+    third = arena.make_node(Mul(x,y))
+    fourth = arena.make_node(Mul(y,x))
+    fifth = arena.make_node(Sub(first, second))
+    sixth = arena.make_node(Add(x,x))
+    seventh = arena.make_node(Mul(x,x))
+    assert first == second
+    assert third == fourth
+    assert fifth == arena.make_node(Num(0))
+    assert sixth == arena.make_node(Mul(arena.make_node(Num(2)),x))
+    assert seventh == arena.make_node(Exp(x,arena.make_node(Num(2))))
+

@@ -47,8 +47,8 @@ class Div:
 
 @dataclass(frozen=True)
 class Exp:
-    left: Expr
-    right: Expr
+    left: int
+    right: int
 
 Expr = Num | Var | Add | Sub | Mul | Div | Exp | Trig
 
@@ -73,6 +73,25 @@ class DagArena:
                         return self.make_node(Num(l.content / r.content))
                     case Exp():
                         return self.make_node(Num(l.content ** r.content))
+            match node, l, r:
+                case ((Mul(), _, Num(0)) | (Mul(), Num(0), _)):
+                    return self.make_node(Num(0))
+                case ((Add(), _, Num(0)) | (Sub(), _, Num(0)) | (Exp(), _, Num(1)) | (Mul(), _, Num(1)) | (Div(), _, Num(1))):
+                    return node.left
+                case ((Add(), Num(0), _) | (Mul(), Num(1), _)):
+                    return node.right
+                case (Sub(), _, _,) if (node.left == node.right):
+                    return self.make_node(Num(0))
+                case (Exp(), _, Num(0)):
+                    return self.make_node(Num(1))
+                case (Add(), _, _) if node.left == node.right:
+                    return self.make_node(Mul(self.make_node(Num(2)), node.left))
+                case (Mul(), _, _) if node.left == node.right:
+                    return self.make_node(Exp(node.left, self.make_node(Num(2))))
+                case (Add(), _, _) if node.left > node.right:
+                    return self.make_node(Add(node.right, node.left))
+                case (Mul(), _, _) if node.left > node.right:
+                    return self.make_node(Mul(node.right, node.left))
         if node in self.hash_table:
             return self.hash_table[node]
         else:
