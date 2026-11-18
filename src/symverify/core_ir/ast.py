@@ -1,3 +1,8 @@
+from __future__ import annotations
+from dataclasses import dataclass
+from enum import Enum, auto 
+
+
 class TrigFunc(Enum):
     SIN = auto()
     COS = auto()
@@ -48,9 +53,31 @@ class Exp:
 Expr = Num | Var | Add | Sub | Mul | Div | Exp | Trig
 
 class DagArena:
-    def __init__():
+    def __init__(self):
         self.nodes: list[Expr] = []
         self.hash_table: dict[Expr, int] = {}
 
     def make_node(self, node: Expr) -> int:
-        if node in 
+        if isinstance(node, Add | Sub | Mul | Div | Exp):
+            l = self.nodes[node.left]
+            r = self.nodes[node.right]
+            if isinstance(l, Num) and isinstance(r, Num):
+                match node:
+                    case Add():
+                        return self.make_node(Num(l.content + r.content))
+                    case Sub():
+                        return self.make_node(Num(l.content - r.content))
+                    case Mul():
+                        return self.make_node(Num(l.content * r.content))
+                    case Div() if r.content != 0:
+                        return self.make_node(Num(l.content / r.content))
+                    case Exp():
+                        return self.make_node(Num(l.content ** r.content))
+        if node in self.hash_table:
+            return self.hash_table[node]
+        else:
+            self.nodes.append(node)
+            new_len = len(self.hash_table)
+            self.hash_table[node] = new_len
+            return new_len
+            

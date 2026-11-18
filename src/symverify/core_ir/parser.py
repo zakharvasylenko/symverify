@@ -1,6 +1,8 @@
+from __future__ import annotations
 from symverify.core_ir.lexer import Token, TokenType
 from dataclasses import dataclass
 from enum import Enum, auto
+
 
 class TrigFunc(Enum):
     SIN = auto()
